@@ -15,7 +15,7 @@
         var player = 0; //score of the player
         var computer = 0; //score of the computer
 
-        const winScore = 3;
+        const winScore = 15;
         var victory = false; //temporarily pauses the game and shows victory
 
         function handleMouseClick(evt){
@@ -98,6 +98,7 @@
                 } else {
                     player++
                     ballReset();
+                    return;
                 }             
             }
             if (ballY < 0 ) {
