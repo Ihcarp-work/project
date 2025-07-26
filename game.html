@@ -1,0 +1,158 @@
+<html>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <script> 
+        var canvas; //information of the dimensions of the display area
+        var canvasContext; //graphical information about the canvas
+        var ballX = 50;
+        var ballS = 50; //speed of the ball
+        var ballY = 10;
+        var ballSy = 10; //speed of the ball going down
+        var paddle1Y = 250; //paddle movement for the player
+        var paddle2Y = 250; //paddle movement for the computer
+        const paddleH = 100; //height of paddle
+        const paddleT = 10; // thickness of paddle
+
+        var player = 0; //score of the player
+        var computer = 0; //score of the computer
+
+        const winScore = 3;
+        var victory = false; //temporarily pauses the game and shows victory
+
+        function handleMouseClick(evt){
+            if(victory);{
+            player = 0;
+            computer = 0;
+            victory = false;
+            }
+        }
+        function calculateMousePos(evt){ //calls the function everytime the mouse moves, evt function calculates the mouse coordinates.
+            var rect = canvas.getBoundingClientRect(); //client rectangle aka the black canvas
+            var root = document.documentElement; 
+            var mouseX = evt.clientX - rect.left - root.scrollLeft;
+            var mouseY = evt.clientY - rect.top - root.scrollTop;
+            return{
+                x:mouseX,
+                y:mouseY
+            };
+        }
+        window.onload = function() {         
+            canvas = document.getElementById('gameCanvas');
+            canvasContext = canvas.getContext('2d');
+            var framesPerSecond = 30;
+            setInterval(callBoth, 1000/framesPerSecond );
+
+            canvas.addEventListener('mousedown', handleMouseClick);
+
+            canvas.addEventListener('mousemove',
+                function(evt) {
+                    var mousePos = calculateMousePos(evt);
+                paddle1Y = mousePos.y - (paddleH / 2);
+                }
+            );
+        }
+        function callBoth(){
+            movement();
+            drawEverything();
+        }   
+
+        function ballReset(){
+            if (player >= winScore || computer >= winScore){ // || -> or else; either the p score OR the c score reaches win number
+                victory = true;
+            }
+            ballS = -ballS;
+            ballY = canvas.height/2;
+            ballX = canvas.width/2;
+        }
+        
+        function computerMovement(){
+            var paddle2YC = paddle2Y + (paddleH / 2);
+            if (paddle2YC < ballY - 35) {
+                paddle2Y += 10
+            } else if (paddle2YC > ballY + 35){
+                paddle2Y -= 10
+            }
+        }
+        function movement(){
+            if (victory){
+                return;
+            }
+            computerMovement()
+            ballX += ballS;
+            ballY += ballSy;
+            if (ballX < 0 ) {
+                if (ballY > paddle1Y && ballY < paddle1Y + paddleH){
+                ballS = -ballS;
+                var deltaY = ballY - (paddle1Y + paddleH/2);
+                ballSy = deltaY * 0.35 // speed of the ball increases depending on where the ball hits the paddle
+                } else {
+                    computer++
+                    ballReset();       
+                    return;             
+                }             
+            }
+            if (ballX > canvas.width) {
+                if (ballY > paddle2Y && ballY < paddle2Y + paddleH){
+                ballS = -ballS;
+                var deltaY = ballY - (paddle2Y + paddleH/2);
+                ballSy = deltaY * 0.35 // speed of the ball increases depending on where the ball hits the paddle
+                } else {
+                    player++
+                    ballReset();
+                }             
+            }
+            if (ballY < 0 ) {
+                ballSy = -ballSy;
+            }
+            if (ballY > canvas.height) {
+                ballSy = -ballSy;
+            }
+
+        }
+        function drawNet(){
+            for ( var i=0; i < canvas.height; i += 40){ //i is the intervals and for every time the loop runs, i increases by 40 till it reaches the bottom
+            colorRect(canvas.width/2-1,i, 2, 20, 'white'); // makes dotted line for the net    
+
+            }
+        }
+        function drawEverything() {
+            colorRect(0,0,canvas.width,canvas.height,'black'); //black background
+            if(victory){
+                if (player >= winScore) {
+                    canvasContext.fillStyle = 'white';
+                    canvasContext.fillText("Player wins", 400, 200,);
+                }
+                else if  (computer >= winScore) {
+                    canvasContext.fillStyle = 'white';
+                    canvasContext.fillText("Computer wins!", 400, 200,);
+                }
+                canvasContext.fillStyle = 'white';
+                canvasContext.fillText("Click to continue", 400, 300,)
+                return; 
+            }
+            drawNet()
+            colorRect(0,paddle1Y,paddleT,paddleH, 'white'); //left paddle for the player
+            colorRect(canvas.width - paddleT,paddle2Y,paddleT,paddleH, 'white'); //paddle for the computer
+            colorCircle(ballX, ballY, 7, 'white');
+            canvasContext.fillText(player, 100, 100,)
+            canvasContext.fillText(computer, canvas.width-100, 100,)
+        }
+        function colorCircle(centreX,centreY,radius,drawColor){
+            canvasContext.fillStyle = drawColor;
+            canvasContext.beginPath();
+            canvasContext.arc(centreX,centreY,radius, 0, Math.PI*2, true); //makes the circle, first 2 numbers are the centre of the circle, 10 is the radius, radians of the circle 2pi, true = clockwise
+            canvasContext.fill();
+        }
+
+        function colorRect(leftX,topY,width,height,drawColor){
+            canvasContext.fillStyle = drawColor;
+            canvasContext.fillRect(leftX,topY,width,height);
+
+        }
+    </script>
+    <head>
+
+    </head>
+    <body>
+
+    </body>
+</html>
